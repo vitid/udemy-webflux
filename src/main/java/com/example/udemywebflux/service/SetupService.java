@@ -7,7 +7,9 @@ import java.util.stream.IntStream;
 
 import org.springframework.stereotype.Service;
 
+import com.example.udemywebflux.dto.Multiply;
 import com.example.udemywebflux.dto.Response0;
+import com.example.udemywebflux.exception.CustomException;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -39,5 +41,19 @@ public class SetupService {
                 .delayElements(Duration.ofSeconds(1))
                 .doOnNext(x -> println("processing: " + x))
                 .map( x -> new Response0(mul * x));
+    }
+
+    public Mono<Response0> multiply(Mono<Multiply> multiplyMono){
+        return multiplyMono
+                .map(m -> m.a() * m.b())
+                .map(x -> new Response0(x));
+    }
+
+    public Mono<Response0> testException(int i){
+        return Mono.fromSupplier(() -> {
+                        if(i < 10) throw new CustomException(100, "argument not valid");
+                        return i * i;
+                    })
+                    .map(x -> new Response0(x));
     }
 }
